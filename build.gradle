@@ -30,9 +30,9 @@ version = branch + "-${project.mod_version}" + "." + commits + (dirty ? "-dirty"
 def modVersion = "${project.mod_version}" + "-" + commits + "+${project.minecraft_version}" // semver-compatible version string for use in fabric.mod.json
 def modRepo
 if (System.env.REPO_NAME) {
-	repo = System.env.REPO_NAME
+	modRepo = System.env.REPO_NAME
 } else {
-	repo = "FabLabsMC/${project.archives_base_name}"
+	modRepo = "FabLabsMC/${project.archives_base_name}"
 }
 
 minecraft {
