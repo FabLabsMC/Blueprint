@@ -21,7 +21,13 @@ if (System.env.BRANCH_NAME) {
 if (branch == "HEAD") {
 	branch = "git rev-parse --short HEAD".execute().in.text.trim()
 }
-def commits = "git rev-list --count HEAD".execute().in.text.trim()
+def commits
+if (System.env.RUN_COUNT) {
+	//CI support, for some reason github actions doesn't like getting the rev-list count
+	commits = System.env.RUN_COUNT
+} else {
+	commits = "git rev-list --count HEAD".execute().in.text.trim()
+}
 def dirty = !"git diff-index HEAD".execute().in.text.trim().isEmpty()
 
 archivesBaseName = "${project.archives_base_name}"

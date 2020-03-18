@@ -28,6 +28,7 @@ jobs:
       run: gradle publish
       env:
         BRANCH_NAME: ${{ github.ref }}
+        RUN_COUNT: ${{ github.run_number }}
         REPO_NAME: ${{ github.repository }}
         USERNAME: ${{ github.actor }}
         PASSWORD: ${{ secrets.GITHUB_TOKEN }}
