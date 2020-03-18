@@ -8,7 +8,7 @@
   "description": "Template for starting out FabLabs drafts",
   "license": "MIT",
   "contact": {
-    "sources": "https://github.com/FabLabsMC/${id}"
+    "sources": "https://github.com/${repo}"
   },
   "environment": "*",
   "entrypoints": {

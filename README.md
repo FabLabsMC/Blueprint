@@ -16,8 +16,8 @@ Setup is designed to be as easy as possible for creating new projects.
 1. Click the "Use this template" button above the file view.
 2. Choose a name for the repo and clone it into the FabLabsMC organization. If you don't have organization access, ask @Boundarybreaker.
 3. Clone the newly-created repo to your desktop.
-4. In [gradle.properties](gradle.properties), change the `archives_base_name` property to be the name of the repo *in all lower case*. This is *mandatory* for proper CI function. If necessary, update Minecraft, Yarn, Fabric Loader and Fabric API versions.
-5. In your IDE, change the name of the `io.github.fablabsmc.blueprint` package and the `io.github.fablabsmc.blueprint.Blueprint` class as necessary. Change the `MODID` field in `Blueprint` as necessary.
+4. In [gradle.properties](gradle.properties), change the `archives_base_name` property to be your mod ID.
+5. In your IDE, change the name of the `io.github.fablabsmc.blueprint` package and the `io.github.fablabsmc.blueprint.Blueprint` class as necessary. Change the `MODID` field in `Blueprint` to your mod ID.
 6. Change the name of `mixins.blueprint.json` by replacing `blueprint` with your mod ID. Change the value of `package` in the mixins JSON as necessary.
 7. In fabric.mod.json, change the `description` and `entrypoints` fields as necessary.
 8. You're all set up to get working!

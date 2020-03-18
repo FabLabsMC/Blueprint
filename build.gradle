@@ -10,24 +10,30 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 // Elytra version format - notes branch, commit count, and dirty in version string
-def branch;
+def branch
 if (System.env.BRANCH_NAME) {
 	// CI support
-	branch = System.env.BRANCH_NAME;
-	branch = branch.substring(branch.lastIndexOf("/")+1);
+	branch = System.env.BRANCH_NAME
+	branch = branch.substring(branch.lastIndexOf("/")+1)
 } else {
-	branch = "git rev-parse --abbrev-ref HEAD".execute().in.text.trim();
+	branch = "git rev-parse --abbrev-ref HEAD".execute().in.text.trim()
 }
 if (branch == "HEAD") {
-	branch = "git rev-parse --short HEAD".execute().in.text.trim();
+	branch = "git rev-parse --short HEAD".execute().in.text.trim()
 }
-def commits = "git rev-list --count HEAD".execute().in.text.trim();
-def dirty = !"git diff-index HEAD".execute().in.text.trim().isEmpty();
+def commits = "git rev-list --count HEAD".execute().in.text.trim()
+def dirty = !"git diff-index HEAD".execute().in.text.trim().isEmpty()
 
 archivesBaseName = "${project.archives_base_name}"
 group = "${project.maven_group}"
 version = branch + "-${project.mod_version}" + "." + commits + (dirty ? "-dirty" : "") + "+${project.minecraft_version}"
 def modVersion = "${project.mod_version}" + "-" + commits + "+${project.minecraft_version}" // semver-compatible version string for use in fabric.mod.json
+def modRepo
+if (System.env.REPO_NAME) {
+	repo = System.env.REPO_NAME
+} else {
+	repo = "FabLabsMC/${project.archives_base_name}"
+}
 
 minecraft {
 }
@@ -48,9 +54,10 @@ dependencies {
 processResources {
 	inputs.property "version", modVersion
 	inputs.property "id", project.archivesBaseName
+	inputs.property "repo", modRepo
 	from(sourceSets.main.resources.srcDirs) {
 		include "fabric.mod.json"
-		expand version: modVersion, id: project.archivesBaseName
+		expand version: modVersion, id: project.archivesBaseName, repo: modRepo
 	}
 	from(sourceSets.main.resources.srcDirs) {
 		exclude "fabric.mod.json"
@@ -81,7 +88,7 @@ publishing {
 	repositories {
 		maven {
 		    name = "GitHubPackages"
-		    url = uri("https://maven.pkg.github.com/fablabsmc/${project.archives_base_name}")
+		    url = uri("https://maven.pkg.github.com/" + modRepo.toLowerCase())
 		    credentials {
 			username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
 			password = project.findProperty("gpr.key") ?: System.getenv("PASSWORD")
