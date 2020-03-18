@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
-  "id": "starter",
+  "id": "${id}",
   "version": "${version}",
 
-  "name": "Fabric Starter",
-  "icon": "assets/starter/icon.png",
-  "description": "Template for starting out Fabric mods",
+  "name": "${id}",
+  "icon": "assets/blueprint/icon.png",
+  "description": "Template for starting out FabLabs drafts",
   "license": "MIT",
   "contact": {
-    "sources": "https://github.com/CottonMC/FabricStarter"
+    "sources": "https://github.com/FabLabsMC/${id}"
   },
   "environment": "*",
   "entrypoints": {
     "main": [
-      "io.github.cottonmc.starter.FabricStarter"
+      "io.github.fablabsmc.blueprint.Blueprint"
     ]
   },
   "mixins": [
-    "mixins.starter.json"
+    "mixins.${id}.json"
   ],
   "depends": {
     "fabricloader": ">=0.4.0"

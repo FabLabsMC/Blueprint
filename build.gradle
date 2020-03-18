@@ -4,19 +4,30 @@ plugins {
 	id "idea"
 	id "fabric-loom" version "0.2.6-SNAPSHOT"
 	id "maven-publish"
-	id "com.jfrog.artifactory" version "4.9.0"
 }
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-if(rootProject.file("private.gradle").exists()) { //Publishing details
-	apply from: "private.gradle"
+// Elytra version format - notes branch, commit count, and dirty in version string
+def branch;
+if (System.env.BRANCH_NAME) {
+	// CI support
+	branch = System.env.BRANCH_NAME;
+	branch = branch.substring(branch.lastIndexOf("/")+1);
+} else {
+	branch = "git rev-parse --abbrev-ref HEAD".execute().in.text.trim();
 }
+if (branch == "HEAD") {
+	branch = "git rev-parse --short HEAD".execute().in.text.trim();
+}
+def commits = "git rev-list --count HEAD".execute().in.text.trim();
+def dirty = !"git diff-index HEAD".execute().in.text.trim().isEmpty();
 
 archivesBaseName = "${project.archives_base_name}"
 group = "${project.maven_group}"
-version = "${project.mod_version}+${project.minecraft_version}"
+version = branch + "-${project.mod_version}" + "." + commits + (dirty ? "-dirty" : "") + "+${project.minecraft_version}"
+def modVersion = "${project.mod_version}" + "-" + commits + "+${project.minecraft_version}" // semver-compatible version string for use in fabric.mod.json
 
 minecraft {
 }
@@ -24,8 +35,6 @@ minecraft {
 repositories {
 	mavenCentral()
 	maven { url "http://maven.fabricmc.net/" } // Fabric maven - home of Fabric API and ModMenu
-	maven { url "http://server.bbkr.space:8081/artifactory/libs-release" } // Cotton maven - home of Cotton projects
-	maven { url "https://maven.abusedmaster.xyz" } // NerdHub maven - home of Cardinal Components
 }
 
 dependencies {
@@ -33,14 +42,15 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_build}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	compileOnly "com.google.code.findbugs:jsr305:3.0.2"
+	// compileOnly "com.google.code.findbugs:jsr305:3.0.2" //TODO: what are we going to do for annotations?
 }
 
 processResources {
-	inputs.property "version", project.version
+	inputs.property "version", modVersion
+	inputs.property "id", project.archivesBaseName
 	from(sourceSets.main.resources.srcDirs) {
 		include "fabric.mod.json"
-		expand version: project.version
+		expand version: modVersion, id: project.archivesBaseName
 	}
 	from(sourceSets.main.resources.srcDirs) {
 		exclude "fabric.mod.json"
@@ -68,57 +78,27 @@ jar {
 
 // configure the maven publication
 publishing {
+	repositories {
+		maven {
+		    name = "GitHubPackages"
+		    url = uri("https://maven.pkg.github.com/fablabsmc/${project.archives_base_name}")
+		    credentials {
+			username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+			password = project.findProperty("gpr.key") ?: System.getenv("PASSWORD")
+		    }
+		}
+		// uncomment to publish to the local maven
+		// mavenLocal()
+	}
 	publications {
-		maven(MavenPublication) {
+		mavenJava(MavenPublication) {
 			// add all the jars that should be included when publishing to maven
-			//artifact(jar) {
-			//	builtBy remapJar
-			//}
-			artifact ("${project.buildDir.absolutePath}/libs/${archivesBaseName}-${project.version}.jar") { //release jar - file location not provided anywhere in loom
-				classifier null
+			artifact(remapJar) {
 				builtBy remapJar
 			}
-
-			artifact ("${project.buildDir.absolutePath}/libs/${archivesBaseName}-${project.version}-dev.jar") { //release jar - file location not provided anywhere in loom
-				classifier "dev"
-				builtBy remapJar
-			}
-
 			artifact(sourcesJar) {
 				builtBy remapSourcesJar
 			}
 		}
-	}
-
-	// select the repositories you want to publish to
-	repositories {
-		// uncomment to publish to the local maven
-		// mavenLocal()
-	}
-}
-
-artifactory {
-	if (project.hasProperty("artifactoryUsername")) {
-		contextUrl = "http://server.bbkr.space:8081/artifactory/"
-		publish {
-			repository {
-				if (version.contains("SNAPSHOT")) {
-					repoKey = "libs-snapshot"
-				} else {
-					repoKey = "libs-release"
-				}
-
-				username = artifactoryUsername
-				password = artifactoryPassword
-			}
-			defaults {
-				publications("maven")
-
-				publishArtifacts = true
-				publishPom = true
-			}
-		}
-	} else {
-		println "Cannot configure artifactory; please define ext.artifactoryUsername and ext.artifactoryPassword before running artifactoryPublish"
 	}
 }
