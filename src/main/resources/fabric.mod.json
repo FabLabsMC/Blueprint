@@ -3,7 +3,7 @@
   "id": "${id}",
   "version": "${version}",
 
-  "name": "${id}",
+  "name": "FabLabs ${libname} version ${libver}",
   "icon": "assets/blueprint/icon.png",
   "description": "Template for starting out FabLabs drafts",
   "license": "MIT",
@@ -13,11 +13,11 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "io.github.fablabsmc.blueprint.Blueprint"
+      "io.github.fablabsmc.fablabs.blueprint.v1.Blueprint"
     ]
   },
   "mixins": [
-    "mixins.${id}.json"
+    "mixins.${libname}.json"
   ],
   "depends": {
     "fabricloader": ">=0.4.0"

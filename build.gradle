@@ -4,6 +4,7 @@ plugins {
 	id "idea"
 	id "fabric-loom" version "0.2.6-SNAPSHOT"
 	id "maven-publish"
+	id "checkstyle"
 }
 
 sourceCompatibility = 1.8
@@ -30,7 +31,9 @@ if (System.env.RUN_COUNT) {
 }
 def dirty = !"git diff-index HEAD".execute().in.text.trim().isEmpty()
 
-archivesBaseName = "${project.archives_base_name}"
+def libName = "${project.library_name}"
+def libVer = "${project.library_version}"
+archivesBaseName = "fablabs-" + libName + "-v" + libVer
 group = "${project.maven_group}"
 version = branch + "-${project.mod_version}" + "." + commits + (dirty ? "-dirty" : "") + "+${project.minecraft_version}"
 def modVersion = "${project.mod_version}" + "-" + commits + "+${project.minecraft_version}" // semver-compatible version string for use in fabric.mod.json
@@ -38,7 +41,7 @@ def modRepo
 if (System.env.REPO_NAME) {
 	modRepo = System.env.REPO_NAME
 } else {
-	modRepo = "FabLabsMC/${project.archives_base_name}"
+	modRepo = "FabLabsMC/${project.library_name}"
 }
 
 minecraft {
@@ -57,13 +60,20 @@ dependencies {
 	// compileOnly "com.google.code.findbugs:jsr305:3.0.2" //TODO: what are we going to do for annotations?
 }
 
+checkstyle {
+	configFile = rootProject.file("checkstyle.xml")
+	toolVersion = '8.25'
+}
+
 processResources {
 	inputs.property "version", modVersion
 	inputs.property "id", project.archivesBaseName
 	inputs.property "repo", modRepo
+	inputs.property "libname", libName
+	inputs.property "libver", libVer
 	from(sourceSets.main.resources.srcDirs) {
 		include "fabric.mod.json"
-		expand version: modVersion, id: project.archivesBaseName, repo: modRepo
+		expand version: modVersion, id: project.archivesBaseName, repo: modRepo, libname: libName, libver: libVer
 	}
 	from(sourceSets.main.resources.srcDirs) {
 		exclude "fabric.mod.json"
