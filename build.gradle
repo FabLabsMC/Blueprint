@@ -4,6 +4,7 @@ plugins {
 	id "idea"
 	id "fabric-loom" version "0.2.7-SNAPSHOT"
 	id "maven-publish"
+	id 'net.minecrell.licenser' version '0.4.1'
 	id "checkstyle"
 }
 
@@ -64,6 +65,14 @@ checkstyle {
 	configFile = rootProject.file("checkstyle.xml")
 	toolVersion = '8.31'
 }
+
+license {
+	header = file('LICENSE')
+	include '**/*.java'
+	style.java = 'BLOCK_COMMENT'
+	newLine = true
+}
+
 
 javadoc {
 	options {
